@@ -1795,14 +1795,25 @@ class GetDistPlotter(_BaseObject):
                         used by the samples
         :return: list of :class:`~.paramnames.ParamInfo` instances for the parameters
         """
-        if hasattr(root, 'param_names'):
-            names = root.param_names
-        elif hasattr(root, 'paramNames'):
-            names = root.paramNames
-        elif hasattr(root, 'names'):
-            names = ParamNames(names=root.names, default=getattr(root, 'dim', 0))
+        def get_names(root):
+            if hasattr(root, 'param_names'):
+                names = root.param_names
+            elif hasattr(root, 'paramNames'):
+                names = root.paramNames
+            elif hasattr(root, 'names'):
+                names = ParamNames(names=root.names, default=getattr(root, 'dim', 0))
+            else:
+                names = self.param_names_for_root(root)
+            return names
+
+        if isinstance(root, list):
+            names = []
+            for root in root:
+                _names = [name.name for name in names]
+                names += [name for name in get_names(root).names if name.name not in _names]
+            names = ParamNames(names=names)
         else:
-            names = self.param_names_for_root(root)
+            names = get_names(root)
 
         if params is None or len(params) == 0:
             return names.names
@@ -2376,7 +2387,7 @@ class GetDistPlotter(_BaseObject):
 
         """
         roots = makeList(roots)
-        params = self.get_param_array(roots[0], params)
+        params = self.get_param_array(roots, params)
         plot_col = len(params)
         if plot_3d_with_param is not None:
             col_param = self._check_param(roots[0], plot_3d_with_param)

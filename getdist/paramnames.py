@@ -181,7 +181,7 @@ class ParamList:
         return self
 
     def setWithNames(self, names):
-        self.names = [ParamInfo(name) for name in names]
+        self.names = [ParamInfo(name) if not isinstance(name, ParamInfo) else name for name in names]
         return self
 
     def setLabels(self, labels):
