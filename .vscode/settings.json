@@ -1,0 +1,73 @@
+{
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "files.exclude": {
+        ".pytest_cache/": true,
+        ".ruff_cache/": true,
+        ".idea": true,
+        "**/__pycache__/": true,
+        "build*/": true,
+        "default_chains": true,
+        "*.egg*": true,
+        "**/.ipynb_checkpoints": true,
+        "**/_summaries*": true,
+        "dist/": true,
+        "**/_build": true,
+        "**/uk.lock": true
+    },
+    "search.exclude": {
+        ".pytest_cache/": true,
+        ".ruff_cache/": true,
+        ".idea": true,
+        "**/__pycache__/": true,
+        "build*/": true,
+        "default_chains": true,
+        "*.egg*": true,
+        "**/.ipynb_checkpoints": true,
+        "**/_summaries*": true,
+        "dist/": true,
+        "**/_build": true,
+        "**/uk.lock": true
+    },
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportGeneralTypeIssues": "none",
+        "reportOptionalMemberAccess": "none",
+        "reportOptionalSubscript": "none",
+        "reportOptionalOperand": "none",
+        "reportOptionalIterable": "none",
+        "reportUnknownMemberType": "none",
+        "reportUnknownArgumentType": "none",
+        "reportUnknownVariableType": "none",
+        "reportUnknownParameterType": "none",
+        "reportMissingTypeStubs": "none",
+        "reportUnknownLambdaType": "none",
+        "reportImportCycles": "none",
+        "reportOptionalCall": "none",
+        "reportOptionalContextManager": "none",
+        "reportTypedDictNotRequiredAccess": "none",
+        "reportArgumentType": "none",
+        "reportOperatorIssue": "none",
+        "reportAttributeAccessIssue": "none",
+        "reportCallIssue": "none"
+    },
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "explicit",
+        "source.organizeImports.ruff": "explicit"
+    },
+    "ruff.organizeImports": true,
+    "ruff.enable": true,
+    "ruff.lint.enable": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.rulers": [
+            120
+        ],
+    },
+    "python.terminal.activateEnvironment": true,
+    "github-actions.use-enterprise": true
+}

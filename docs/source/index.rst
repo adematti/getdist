@@ -9,6 +9,11 @@ GetDist is a Python package for analysing and plotting Monte Carlo (or other) sa
    Introduction <intro>
    Plot gallery and tutorial <https://getdist.readthedocs.io/en/latest/plot_gallery.html>
    GetDist GUI program <gui>
+   Paper with technical details <https://arxiv.org/abs/1910.13970>
+
+
+**LLM Integration**: For AI assistants and LLM agents, a comprehensive `LLM context document <https://getdist.readthedocs.io/en/latest/_static/getdist_docs_combined.md>`_ can be used.
+There's also an `AI help assistant <https://cosmocoffee.info/help_assist.php>`_ you can use to ask about the package.
 
 High-level modules for analysing samples and plotting:
 
@@ -18,11 +23,13 @@ High-level modules for analysing samples and plotting:
    mcsamples
    plots
 
+
 See also:
 
 .. toctree::
 
    analysis_settings
+   arviz_integration
 
 Other main modules:
 

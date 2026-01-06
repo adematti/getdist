@@ -1,0 +1,72 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Streamlit App",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "getdist/gui/streamlit_app.py",
+                "--server.runOnSave=true"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "python": "${command:python.interpreterPath}"
+        },
+        {
+            "name": "Debug Streamlit App",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "getdist/gui/streamlit_app.py",
+                "--server.runOnSave=true"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "showReturnValue": true,
+            "redirectOutput": true,
+            "python": "${command:python.interpreterPath}"
+        },
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "python": "${command:python.interpreterPath}"
+        },
+        {
+            "name": "GetDist Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "unittest",
+            "args": [
+                "getdist.tests.getdist_test"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug GetDist Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "unittest",
+            "args": [
+                "getdist.tests.getdist_test"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "showReturnValue": true,
+            "redirectOutput": true,
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

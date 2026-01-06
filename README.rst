@@ -7,8 +7,8 @@ GetDist
 :Source: https://github.com/cmbant/getdist
 :Reference: https://arxiv.org/abs/1910.13970
 
-.. image:: https://travis-ci.com/cmbant/getdist.svg?branch=master
-   :target: https://app.travis-ci.com/cmbant/getdist
+.. image:: https://github.com/cmbant/getdist/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/cmbant/getdist/actions/workflows/tests.yml
 .. image:: https://img.shields.io/pypi/v/GetDist.svg?style=flat
    :target: https://pypi.python.org/pypi/GetDist/
 .. image:: https://readthedocs.org/projects/getdist/badge/?version=latest
@@ -24,16 +24,16 @@ Description
 GetDist is a Python package for analysing Monte Carlo samples, including correlated samples
 from Markov Chain Monte Carlo (MCMC).
 
-* **Point and click GUI** - select chain files, view plots, marginalized constraints, LaTeX tables and more
+* **Point and click GUI** - select chain files, view plots, marginalized constraints, LaTeX tables and more (Qt-based desktop app and Streamlit web interface)
 * **Plotting library** - make custom publication-ready 1D, 2D, 3D-scatter, triangle and other plots
 * **Named parameters** - simple handling of many parameters using parameter names, including LaTeX labels and prior bounds
 * **Optimized Kernel Density Estimation** - automated optimal bandwidth choice for 1D and 2D densities (Botev et al. Improved Sheather-Jones method), with boundary and bias correction
 * **Convergence diagnostics** - including correlation length and diagonalized Gelman-Rubin statistics
 * **LaTeX tables** for marginalized 1D constraints
 
-See the `Plot Gallery and tutorial <http://getdist.readthedocs.io/en/latest/plot_gallery.html>`_
+See the `Plot Gallery and tutorial <https://getdist.readthedocs.io/en/latest/plot_gallery.html>`_
 (`run online <https://mybinder.org/v2/gh/cmbant/getdist/master?filepath=docs%2Fplot_gallery.ipynb>`_)
-and `GetDist Documentation <http://getdist.readthedocs.io/en/latest/index.html>`_.
+and `GetDist Documentation <https://getdist.readthedocs.io/en/latest/index.html>`_.
 
 
 Getting Started
@@ -45,10 +45,6 @@ Install getdist using pip::
 
 or from source files using::
 
-    $ python setup.py install
-
-or::
-
     $ pip install -e /path/to/source/
 
 You can test if things are working using the unit test by running::
@@ -59,20 +55,22 @@ Check the dependencies listed in the next section are installed. You can then us
 use the GetDist GUI (*getdist-gui* command).
 
 Once installed, the best way to get up to speed is probably to read through
-the `Plot Gallery and tutorial <http://getdist.readthedocs.io/en/latest/plot_gallery.html>`_.
+the `Plot Gallery and tutorial <https://getdist.readthedocs.io/en/latest/plot_gallery.html>`_.
 
 Dependencies
 =============
-* Python 3.7+
+* Python 3.10+
 * matplotlib
 * scipy
-* PySide6 or PySide2 - optional, only needed for GUI
+* PySide6 - optional, only needed for Qt-based GUI
+* Streamlit - optional, only needed for web-based GUI
 * Working LaTeX installation (not essential, only for some plotting/table functions)
 
 Python distributions like Anaconda have most of what you need (except for LaTeX).
 
-To use the `GUI <https://getdist.readthedocs.io/en/latest/gui.html>`_ you need PySide.
-See the `GUI docs <https://getdist.readthedocs.io/en/latest/gui.html#installation>`_ for suggestions on how to install.
+To use the Qt-based `GUI <https://getdist.readthedocs.io/en/latest/gui.html>`_ you need PySide6.
+To use the Streamlit web interface, you need Streamlit.
+See the `GUI docs <https://getdist.readthedocs.io/en/latest/gui.html#installation>`_ for suggestions on how to install both.
 
 Algorithm details
 ==================
@@ -84,10 +82,12 @@ Samples file format
 ===================
 
 GetDist can be used in scripts and interactively with standard numpy arrays
-(as in the `examples <http://getdist.readthedocs.io/en/latest/plot_gallery.html>`_).
-Scripts and the `GetDist GUI <http://getdist.readthedocs.io/en/latest/gui.html>`_ can also read parameter sample/chain files in plain text format
-(or in the format output by the `Cobaya <https://cobaya.readthedocs.io>`__ sampling program).
-In general plain text files of the form::
+(as in the `examples <https://getdist.readthedocs.io/en/latest/plot_gallery.html>`_).
+
+Scripts and the `GetDist GUI <https://getdist.readthedocs.io/en/latest/gui.html>`_ can also read parameter sample/chain files in plain text format
+(or in the format output by the `Cobaya <https://cobaya.readthedocs.io>`__ sampling program.
+
+Plain text sample files are of the form::
 
   xxx_1.txt
   xxx_2.txt
@@ -101,7 +101,7 @@ The .txt files are separate chain files (there can also be just one xxx.txt file
 
   *weight like param1 param2 param3* ...
 
-The *weight* gives the number of samples (or importance weight) with these parameters. *like* gives -log(likelihood), and *param1, param2...* are the values of the parameters at the sample point. The first two columns can be 1 and 0 if they are not known or used.
+The *weight* gives the number of samples (or importance weight) with these parameters. *like* gives -log(posterior), and *param1, param2...* are the values of the parameters at the sample point. The first two columns can be 1 and 0 if they are not known or used.
 
 The .paramnames file lists the names of the parameters, one per line, optionally followed by a LaTeX label. Names cannot include spaces, and if they end in "*" they are interpreted as derived (rather than MCMC) parameters, e.g.::
 
@@ -147,7 +147,8 @@ from two chains with root names *xxx* and *yyy*::
 
 
 MCSamples objects can also be constructed directly from numpy arrays in memory, see the example
-in the `Plot Gallery <https://getdist.readthedocs.io/en/latest/plot_gallery.html>`_.
+in the `Plot Gallery <https://getdist.readthedocs.io/en/latest/plot_gallery.html>`_,
+and from, `ArviZ, PyMC and other sampler formats <https://getdist.readthedocs.io/en/latest/arviz_integration.html>`_.
 
 GetDist script
 ===================
@@ -192,9 +193,17 @@ to produce the setting file distparams.ini, edit it, then run with your custom s
 GetDist GUI
 ===================
 
-Run *getdist-gui* to run the graphical user interface. This requires PySide, but will run on Windows, Linux and Mac.
-It allows you to open a folder of chain files, then easily select, open, plot and compare, as well as viewing standard GetDist outputs and tables.
-See the `GUI Readme <http://getdist.readthedocs.io/en/latest/gui.html>`_.
+GetDist provides two graphical user interfaces:
+
+1. **Qt-based Desktop App**: Run *getdist-gui* to use the traditional desktop interface. This requires PySide6 to be installed.
+
+2. **Streamlit Web Interface**: Run *getdist-streamlit* to use the browser-based interface. This requires Streamlit to be installed.
+
+Both interfaces allow you to open a folder of chain files, then easily select, open, plot and compare, as well as viewing standard GetDist outputs and tables.
+
+You can also try the Streamlit interface online at `<https://getdist-gui-test.streamlit.app/>`_ (with fixed example chains).
+
+See the `GUI Documentation <https://getdist.readthedocs.io/en/latest/gui.html>`_ for more details on both interfaces.
 
 
 Using with CosmoMC and Cobaya
@@ -208,22 +217,30 @@ and using CosmoMC parameter grids in the `Readme <https://cosmologist.info/cosmo
 
 Citation
 ===================
-You can refer to the notes::
+You can refer to the JCAP paper::
 
-     @article{Lewis:2019xzd,
-      author         = "Lewis, Antony",
-      title          = "{GetDist: a Python package for analysing Monte Carlo
-                        samples}",
-      year           = "2019",
-      eprint         = "1910.13970",
-      archivePrefix  = "arXiv",
-      primaryClass   = "astro-ph.IM",
-      SLACcitation   = "%%CITATION = ARXIV:1910.13970;%%",
-      url            = "https://getdist.readthedocs.io"
-     }
-
+      @article{Lewis:2019xzd,
+         author = "Lewis, Antony",
+         title = "{GetDist: a Python package for analysing Monte Carlo samples}",
+         eprint = "1910.13970",
+         archivePrefix = "arXiv",
+         primaryClass = "astro-ph.IM",
+         doi = "10.1088/1475-7516/2025/08/025",
+         journal = "JCAP",
+         volume = "08",
+         pages = "025",
+         year = "2025"
+      }
 
 and references therein as appropriate.
+
+LLM Integration
+===================
+For AI assistants and LLM agents working with GetDist, a single-file context document is available at `GetDist LLM Context <https://help.cosmologist.info/api/context/getdist>`_. This document provides a comprehensive overview of GetDist's functionality, common usage patterns, and best practices in a format optimized for LLM context windows.
+
+Contributing
+===================
+Please see the `Contributing Guide <https://github.com/cmbant/getdist/blob/master/CONTRIBUTING.md>`_.
 
 ===================
 

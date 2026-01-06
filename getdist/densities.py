@@ -1,6 +1,7 @@
+from collections.abc import Sequence
+
 import numpy as np
-from scipy.interpolate import splrep, splev, RectBivariateSpline, LinearNDInterpolator
-from typing import Sequence
+from scipy.interpolate import LinearNDInterpolator, RectBivariateSpline, splev, splrep
 
 
 class DensitiesError(Exception):
@@ -17,14 +18,14 @@ class InterpGridCache:
 # noinspection PyTypeChecker
 def getContourLevels(inbins, contours=defaultContours, missing_norm=0, half_edge=True):
     """
-     Get contour levels enclosing "contours" fraction of the probability, for any dimension bins array
+    Get contour levels enclosing "contours" fraction of the probability, for any dimension bins array
 
-     :param inbins: binned density.
-     :param contours: list or tuple of confidence contours to calculate, default [0.68, 0.95]
-     :param missing_norm: accounts of any points not included in inbins
-                         (e.g. points in far tails that are not in inbins)
-     :param half_edge: If True, edge bins are only half integrated over in each direction.
-     :return: list of density levels
+    :param inbins: binned density.
+    :param contours: list or tuple of confidence contours to calculate, default [0.68, 0.95]
+    :param missing_norm: accounts of any points not included in inbins
+                        (e.g. points in far tails that are not in inbins)
+    :param half_edge: If True, edge bins are only half integrated over in each direction.
+    :return: list of density levels
 
     """
     contour_levels = np.zeros(len(contours))
@@ -61,12 +62,13 @@ class GridDensity:
 
     :ivar P: array of density values
     """
+
     norm: float
     axes: Sequence[np.ndarray]
     view_ranges: Sequence[Sequence[float]]
     norm_integral: callable
 
-    def normalize(self, by='integral', in_place=False):
+    def normalize(self, by="integral", in_place=False):
         """
         Normalize the density grid
 
@@ -74,12 +76,12 @@ class GridDensity:
         :param in_place: if True, normalize in place, otherwise make copy (in case self.P is used elsewhere)
         """
 
-        if by == 'integral':
+        if by == "integral":
             norm = self.norm_integral()
-        elif by == 'max':
+        elif by == "max":
             norm = np.max(self.P)
             if norm == 0:
-                raise DensitiesError('no samples in bin')
+                raise DensitiesError("no samples in bin")
         else:
             raise DensitiesError("Density: unknown normalization")
         if in_place:
@@ -98,7 +100,7 @@ class GridDensity:
         if P is not None:
             for size, ax in zip(P.shape, self.axes):
                 if size != ax.size:
-                    raise DensitiesError("Array size mismatch in Density arrays: P %s, axis %s" % (size, ax.size))
+                    raise DensitiesError(f"Array size mismatch in Density arrays: P {size}, axis {ax.size}")
             self.P = P
         else:
             self.P = np.zeros([ax.size for ax in self.axes])
@@ -106,9 +108,9 @@ class GridDensity:
 
     def bounds(self):
         """
-         Get bounds in order x, y, z..
+        Get bounds in order x, y, z..
 
-         :return: list of (min,max) values
+        :return: list of (min,max) values
         """
         if self.view_ranges is not None:
             return self.view_ranges
@@ -182,7 +184,6 @@ class Density1D(GridDensity):
         return self.integrate(self.P)
 
     def initLimitGrids(self, factor=None):
-
         if self.spl is None:
             self._initSpline()
 
@@ -207,10 +208,10 @@ class Density1D(GridDensity):
         Get parameter equal-density confidence limits (a credible interval).
         If the density is bounded, may only have a one-tail limit.
 
-        :param p: list of limits to calculate, e.g. [0.68, 0.95]
+        :param p: limit to calculate, or list of limits to calculate, e.g. [0.68, 0.95]
         :param interpGrid: optional pre-computed cache
         :param accuracy_factor: parameter to boost default accuracy for fine sampling
-        :return: list of (min, max, has_min, has_top) values
+        :return: list of (min, max, has_min, has_top) values, or tuple fo single limit,
                 where has_min and has_top are True or False depending on whether lower and upper limit exists
         """
         g = interpGrid or self.initLimitGrids(accuracy_factor)
@@ -226,7 +227,7 @@ class Density1D(GridDensity):
                 trial = (1 - frac) * trial + frac * g.sortgrid[ix + 1]
 
             finespace = self.spacing / g.factor
-            lim_bot = (g.grid[0] >= trial)
+            lim_bot = g.grid[0] >= trial
             if lim_bot:
                 mn = self.x[0]
             else:
@@ -234,7 +235,7 @@ class Density1D(GridDensity):
                 d = (g.grid[i] - trial) / (g.grid[i] - g.grid[i - 1])
                 mn = self.x[0] + (i - d) * finespace
 
-            lim_top = (g.grid[-1] >= trial)
+            lim_top = g.grid[-1] >= trial
             if lim_top:
                 mx = self.x[-1]
             else:
@@ -253,23 +254,28 @@ class Density2D(GridDensity):
     You can call it like a :class:`~scipy:scipy.interpolate.RectBivariateSpline` object to get interpolated values.
     """
 
-    def __init__(self, x, y, P=None, view_ranges=None):
+    def __init__(self, x, y, P=None, view_ranges=None, mask=None):
         """
         :param x: array of x values
         :param y: array of y values
         :param P: 2D array of density values at x, y
         :param view_ranges: optional ranges for viewing density
+        :param mask: optional 2D boolean array for non-trivial mask
         """
         self.x = x
         self.y = y
         self.axes = [y, x]
         self.view_ranges = view_ranges
+        self.mask = mask
         self.spacing = (self.x[1] - self.x[0]) * (self.y[1] - self.y[0])
         self.setP(P)
 
     def integrate(self, P):
-        norm = np.sum(P[1:-1, 1:-1]) + (P[0, 0] + P[0, -1] + P[-1, 0] + P[-1, -1]) / 4.0 \
-               + (np.sum(P[1:-1, 0]) + np.sum(P[0, 1:-1]) + np.sum(P[1:-1, -1]) + np.sum(P[-1, 1:-1])) / 2.0
+        norm = (
+            np.sum(P[1:-1, 1:-1])
+            + (P[0, 0] + P[0, -1] + P[-1, 0] + P[-1, -1]) / 4.0
+            + (np.sum(P[1:-1, 0]) + np.sum(P[0, 1:-1]) + np.sum(P[1:-1, -1]) + np.sum(P[-1, 1:-1])) / 2.0
+        )
         norm *= self.spacing
         return norm
 
@@ -322,14 +328,13 @@ class DensityND(GridDensity):
         self.axes = xs[::-1]
         self.view_ranges = view_ranges
 
-        self.spacing = 1.
+        self.spacing = 1.0
         for i in range(len(xs)):
             self.spacing = self.spacing * (self.xs[i][1] - self.xs[i][0])
 
         self.setP(P)
 
     def integrate(self, P):
-
         ndim = len(P)
 
         multinorm = np.zeros(ndim + 1)
@@ -348,14 +353,14 @@ class DensityND(GridDensity):
             # accumulate P over all hypersurfaces
             multinorm[nboundaries] += P[ind]
 
-        norm = 0.
+        norm = 0.0
         for i in range(len(multinorm)):
             # i=0, we are inside
             # i=1, one coordinate on the boundary -> hypercube face of dimension D-1 -> 1 co-dimension
             # i=2, two coordinates on the boundary -> hypercube line of dimension D-2 -> 2 co-dimensions
             # etc...
 
-            norm += multinorm[i] / 2 ** i
+            norm += multinorm[i] / 2**i
 
         return norm
 

@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 
 
@@ -19,30 +20,30 @@ class ParamBounds:
         self.names = []
         self.lower = {}
         self.upper = {}
+        self.periodic = set()
         if fileName is not None:
             self.loadFromFile(fileName)
 
     def loadFromFile(self, fileName):
         self.filenameLoadedFrom = os.path.split(fileName)[1]
         extension = os.path.splitext(fileName)[-1]
-        if extension in ('.ranges', '.bounds'):
-            with open(fileName, encoding='utf-8-sig') as f:
+        if extension in (".ranges", ".bounds"):
+            with open(fileName, encoding="utf-8-sig") as f:
                 for line in f:
                     strings = [text.strip() for text in line.split()]
-                    if len(strings) == 3:
+                    if len(strings) in [3, 4]:
                         self.setRange(strings[0], strings[1:])
-        elif extension in ('.yaml', '.yml'):
-            from getdist.cobaya_interface import get_range, get_info_params, is_parameter_with_range
+        elif extension in (".yaml", ".yml"):
+            from getdist.cobaya_interface import get_info_params, get_range
+
             info_params = get_info_params(fileName)
             for p, info in info_params.items():
-                if is_parameter_with_range(info):
-                    self.setRange(p, get_range(info))
+                self.setRange(p, get_range(info))
         else:
-            raise ValueError('ParamBounds must be loaded from .bounds, .ranges or .yaml/.yml file, '
-                             'not %s' % fileName)
+            raise ValueError("ParamBounds must be loaded from .bounds, .ranges or .yaml/.yml file, not %s" % fileName)
 
     def __str__(self):
-        s = ''
+        s = ""
         for name in self.names:
             valMin = self.getLower(name)
             if valMin is not None:
@@ -54,7 +55,11 @@ class ParamBounds:
                 lim2 = "%15.7E" % valMax
             else:
                 lim2 = "    N"
-            s += "%22s%17s%17s\n" % (name, lim1, lim2)
+            if name in self.periodic:
+                s += "%22s%17s%17s%10s\n" % (name, lim1, lim2, "periodic")
+            else:
+                s += "%22s%17s%17s\n" % (name, lim1, lim2)
+
         return s
 
     def saveToFile(self, fileName):
@@ -63,22 +68,33 @@ class ParamBounds:
 
         :param fileName: file name to save to
         """
-        with open(fileName, 'w', encoding='utf-8') as f:
+        with open(fileName, "w", encoding="utf-8") as f:
             f.write(str(self))
 
     def _check_name(self, name):
         if not isinstance(name, str):
-            raise ValueError('"name" must be a parameter name string not %s: %s' % (type(name), name))
+            raise ValueError(f'"name" must be a parameter name string not {type(name)}: {name}')
 
     def setFixed(self, name, value):
         self.setRange(name, (value, value))
 
     def setRange(self, name, strings):
+        if strings[0] is None and strings[1] is None:
+            return
         self._check_name(name)
-        if strings[0] != 'N' and strings[0] is not None and strings[0] != -np.inf:
+        if strings[0] != "N" and strings[0] is not None and strings[0] != -np.inf:
             self.lower[name] = float(strings[0])
-        if strings[1] != 'N' and strings[1] is not None and strings[1] != np.inf:
+        if strings[1] != "N" and strings[1] is not None and strings[1] != np.inf:
             self.upper[name] = float(strings[1])
+        if len(strings) > 2:
+            periodic = strings[2]
+            if periodic is True or isinstance(periodic, str) and periodic.upper() in ["T", "TRUE", "PERIODIC"]:
+                if name not in self.upper or name not in self.lower:
+                    raise ValueError(f"Periodic parameter must have lower and upper bound: {name}")
+                self.periodic.add(name)
+            elif periodic is not False and (not isinstance(periodic, str) or periodic.upper() not in ["F", "FALSE"]):
+                raise ValueError(f"Unknown value for periodic range settings for param {name}: {periodic}")
+
         if name not in self.names:
             self.names.append(name)
 
